@@ -1,0 +1,27 @@
+CompileFlags:
+  Add:
+    - -std=c++23
+    # Warnings: enable all, treat as errors (including deprecated)
+    - -Wall
+    - -Werror
+    - -Weverything
+    - -Werror=deprecated
+    - -Wpedantic
+    # C++23 project: ignore C++98 compatibility (included in -Weverything)
+    - -Wno-c++98-compat
+    - -Wno-c++98-compat-pedantic
+    # Use Homebrew LLVM libc++
+    - -nostdinc++
+    - -isystem
+    - /opt/homebrew/opt/llvm/include/c++/v1
+
+    # macOS SDK system headers (IMPORTANT when using -nostdinc++)
+    # - -isystem
+    # - /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include
+
+    # Project headers (relative to project root)
+    - -I/Users/laksh/Documents/PersonalCode/coding-challenges/cc-compression-tool-cpp/include
+
+    # Boost headers
+    - -isystem
+    - /opt/homebrew/opt/boost/include
