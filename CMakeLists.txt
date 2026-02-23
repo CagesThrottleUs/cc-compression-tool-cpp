@@ -28,14 +28,14 @@ set_target_properties(GMP::GMP PROPERTIES
 # ----------------------------- Main Executable -----------------------------
 
 set(SRC_FILES
-  src/main.cpp
   src/exceptions/exceptions.cpp
   src/argument/arguments.cpp
   src/file_handler/input_file.cpp
   src/frequency_table/frequency_table.cpp
+  src/prefix_codes/prefix_codes.cpp
 )
 
-add_executable(${PROJECT_NAME} ${SRC_FILES})
+add_executable(${PROJECT_NAME} src/main.cpp ${SRC_FILES})
 
 target_include_directories(${PROJECT_NAME} PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}/include
@@ -68,10 +68,8 @@ add_executable(cc_compression_tool_test
     test/arguments_test.cpp
     test/file_handler_test.cpp
     test/frequency_table_test.cpp
-    src/argument/arguments.cpp
-    src/exceptions/exceptions.cpp
-    src/file_handler/input_file.cpp
-    src/frequency_table/frequency_table.cpp # Added this so your tests can find the freq logic
+    test/prefix_codes_test.cpp
+    ${SRC_FILES}
 )
 
 target_include_directories(cc_compression_tool_test PRIVATE
