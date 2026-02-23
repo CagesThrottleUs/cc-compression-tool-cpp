@@ -25,6 +25,9 @@ auto main(int argc, char** argv) -> int {
   } catch (const exceptions::file_operation_exception& e) {
     std::cerr << e.what() << '\n';
     return std::to_underlying(exit_codes::exit_code::file_operation_error);
+  } catch (const std::exception& e) {
+    std::cerr << "Error: " << e.what() << '\n';
+    return std::to_underlying(exit_codes::exit_code::unknown_error);
   } catch (...) {
     std::cerr << "Unknown error\n";
     return std::to_underlying(exit_codes::exit_code::unknown_error);
