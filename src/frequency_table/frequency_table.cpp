@@ -51,7 +51,7 @@ auto build_frequency_table(std::unique_ptr<file_handler::input_file> input)
     result.push_back({codepoint, count});
   }
 
-  std::ranges::sort(result, std::less<node>());
+  std::ranges::sort(result, std::less<>());
 
   return result;
 }
