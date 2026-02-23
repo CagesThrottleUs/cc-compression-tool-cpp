@@ -8,6 +8,9 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # Set src files
 set(SRC_FILES
   src/main.cpp
+  src/exceptions/exceptions.cpp
+  src/argument/arguments.cpp
+  src/file_handler/input_file.cpp
 )
 
 add_executable(cc-compression-tool-cpp ${SRC_FILES})
@@ -17,7 +20,10 @@ target_include_directories(cc-compression-tool-cpp PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
-# Add googletest
+# ----------------------------- Add Boost -----------------------------
+find_package(Boost REQUIRED COMPONENTS iostreams CONFIG)
+
+# ----------------------------- Add googletest -----------------------------
 include(FetchContent)
 FetchContent_Declare(
     googletest
@@ -31,6 +37,8 @@ enable_testing()
 # Add test files
 set(TEST_FILES
   test/hello_test.cpp
+  test/arguments_test.cpp
+  test/file_handler_test.cpp
 )
 
 # Disable clang-tidy for gtest targets
@@ -38,8 +46,20 @@ set_target_properties(gtest gtest_main PROPERTIES
     SKIP_CLANG_TIDY TRUE
 )
 
-
-add_executable(cc_compression_tool_test ${TEST_FILES})
-target_link_libraries(cc_compression_tool_test PRIVATE GTest::gtest_main)
+add_executable(cc_compression_tool_test ${TEST_FILES}
+  src/argument/arguments.cpp
+  src/exceptions/exceptions.cpp
+  src/file_handler/input_file.cpp
+)
+target_include_directories(cc_compression_tool_test PRIVATE
+  ${CMAKE_CURRENT_SOURCE_DIR}/include
+  ${CMAKE_CURRENT_SOURCE_DIR}/src
+)
+target_link_libraries(cc_compression_tool_test PRIVATE
+  GTest::gtest_main
+  Boost::iostreams
+)
 include(GoogleTest)
 gtest_discover_tests(cc_compression_tool_test)
+
+target_link_libraries(${PROJECT_NAME} PRIVATE Boost::iostreams)
