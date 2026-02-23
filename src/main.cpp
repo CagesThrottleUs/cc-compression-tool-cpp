@@ -6,6 +6,7 @@
 #include "exceptions/file_operation_exception.hpp"
 #include "exit_codes.hpp"
 #include "file_handler/input_file.hpp"
+#include "file_handler/output_file.hpp"
 #include "frequency_table/frequency_table.hpp"
 #include "prefix_codes/prefix_codes.hpp"
 
@@ -22,6 +23,13 @@ auto main(int argc, char** argv) -> int {
       std::cout << file_handler::codepoint_to_utf8(codepoint) << " " << prefix
                 << '\n';
     }
+
+    auto out_file_path = argument::get_output_file_path(validated_args);
+
+    file_handler::output_file out(out_file_path);
+    file_handler::write_header(prefixes, out);
+    file_handler::write_file_contents(
+        file_handler::load_file(validated_args[1]), prefixes, out);
   } catch (const exceptions::argument_exception& e) {
     std::cerr << e.what() << '\n';
     return std::to_underlying(exit_codes::exit_code::argument_error);
