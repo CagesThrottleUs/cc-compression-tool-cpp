@@ -1,8 +1,8 @@
 #ifndef OUTPUT_FILE_HPP
 #define OUTPUT_FILE_HPP
 
-#include <functional>
 #include <fstream>
+#include <functional>
 #include <map>
 #include <string>
 
@@ -68,11 +68,11 @@ auto write_header(const std::map<char32_t, std::string>& prefixes,
 using write_progress_callback =
     std::function<void(std::size_t current, std::size_t total)>;
 
-auto write_file_contents(
-    std::unique_ptr<file_handler::input_file> input,
-    const std::map<char32_t, std::string>& prefixes,
-    output_file& file,
-    write_progress_callback* progress = nullptr) noexcept -> void;
+auto write_file_contents(std::unique_ptr<file_handler::input_file> input,
+                         const std::map<char32_t, std::string>& prefixes,
+                         output_file& file,
+                         write_progress_callback* progress = nullptr) noexcept
+    -> void;
 
 }  // namespace file_handler
 

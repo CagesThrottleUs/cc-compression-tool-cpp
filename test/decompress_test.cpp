@@ -1,3 +1,5 @@
+#include "decompress.hpp"
+
 #include <gtest/gtest.h>
 
 #include <filesystem>
@@ -6,7 +8,6 @@
 
 #include "argument/argument.hpp"
 #include "compress.hpp"
-#include "decompress.hpp"
 #include "exceptions/file_operation_exception.hpp"
 
 namespace {

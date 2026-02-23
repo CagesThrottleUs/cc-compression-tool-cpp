@@ -1,3 +1,5 @@
+#include "file_handler/output_file.hpp"
+
 #include <gtest/gtest.h>
 
 #include <cstdint>
@@ -10,7 +12,6 @@
 
 #include "exceptions/file_operation_exception.hpp"
 #include "file_handler/input_file.hpp"
-#include "file_handler/output_file.hpp"
 
 namespace {
 
@@ -36,7 +37,7 @@ class OutputFileTest : public ::testing::Test {
     std::ifstream f(p, std::ios::binary);
     if (!f) return {};
     return std::string(std::istreambuf_iterator<char>(f),
-                      std::istreambuf_iterator<char>());
+                       std::istreambuf_iterator<char>());
   }
 
   std::filesystem::path temp_dir_;
@@ -55,8 +56,9 @@ TEST_F(OutputFileTest, Constructor_ValidPath_OpensFile) {
 
 TEST_F(OutputFileTest, Constructor_DirectoryPath_ThrowsFileOperationException) {
   const auto path = temp_dir_.string();
-  EXPECT_THROW({ file_handler::output_file out(path); },
-               exceptions::file_operation_exception);
+  EXPECT_THROW(
+      { file_handler::output_file out(path); },
+      exceptions::file_operation_exception);
 }
 
 TEST_F(OutputFileTest,
@@ -120,7 +122,8 @@ TEST_F(OutputFileTest, WriteHeader_EmptyMap_WritesCountZero) {
   EXPECT_EQ(static_cast<unsigned char>(data[3]), 0x00);
 }
 
-TEST_F(OutputFileTest, WriteHeader_OneEntry_WritesCountCodepointLenAndPackedBits) {
+TEST_F(OutputFileTest,
+       WriteHeader_OneEntry_WritesCountCodepointLenAndPackedBits) {
   const auto path = (temp_dir_ / "header_one.bin").string();
   std::map<char32_t, std::string> prefixes;
   prefixes[U'A'] = "1";  // 1 bit set -> one byte 0x80 (MSB)
@@ -129,7 +132,8 @@ TEST_F(OutputFileTest, WriteHeader_OneEntry_WritesCountCodepointLenAndPackedBits
     file_handler::write_header(prefixes, out);
   }
   const std::string data = read_file_binary(path);
-  // count=1 (4 bytes BE), codepoint=65 (4 bytes BE), code_len=1 (1 byte), 1 packed byte
+  // count=1 (4 bytes BE), codepoint=65 (4 bytes BE), code_len=1 (1 byte), 1
+  // packed byte
   ASSERT_GE(data.size(), 10U);
   EXPECT_EQ(static_cast<unsigned char>(data[0]), 0x00);
   EXPECT_EQ(static_cast<unsigned char>(data[1]), 0x00);
@@ -140,7 +144,7 @@ TEST_F(OutputFileTest, WriteHeader_OneEntry_WritesCountCodepointLenAndPackedBits
   EXPECT_EQ(static_cast<unsigned char>(data[6]), 0x00);
   EXPECT_EQ(static_cast<unsigned char>(data[7]), 0x41);  // 'A' = 65
   EXPECT_EQ(static_cast<unsigned char>(data[8]), 0x01);  // code_len = 1
-  EXPECT_EQ(static_cast<unsigned char>(data[9]), 0x80);   // bit "1" MSB
+  EXPECT_EQ(static_cast<unsigned char>(data[9]), 0x80);  // bit "1" MSB
 }
 
 TEST_F(OutputFileTest, WriteHeader_TwoEntries_WritesBoth) {
@@ -153,13 +157,14 @@ TEST_F(OutputFileTest, WriteHeader_TwoEntries_WritesBoth) {
     file_handler::write_header(prefixes, out);
   }
   const std::string data = read_file_binary(path);
-  // count=2 (4 bytes), then A: codepoint 65, len 1, 1 byte; B: codepoint 66, len 2, 1 byte
+  // count=2 (4 bytes), then A: codepoint 65, len 1, 1 byte; B: codepoint 66,
+  // len 2, 1 byte
   ASSERT_GE(data.size(), 16U);
   EXPECT_EQ(static_cast<unsigned char>(data[3]), 0x02);  // count
-  EXPECT_EQ(static_cast<unsigned char>(data[7]), 0x41);   // 'A'
+  EXPECT_EQ(static_cast<unsigned char>(data[7]), 0x41);  // 'A'
   EXPECT_EQ(static_cast<unsigned char>(data[8]), 0x01);
   EXPECT_EQ(static_cast<unsigned char>(data[9]), 0x00);   // "0" -> 0
-  EXPECT_EQ(static_cast<unsigned char>(data[13]), 0x42);   // 'B'
+  EXPECT_EQ(static_cast<unsigned char>(data[13]), 0x42);  // 'B'
   EXPECT_EQ(static_cast<unsigned char>(data[14]), 0x02);  // len 2
   EXPECT_EQ(static_cast<unsigned char>(data[15]), 0xC0);  // "11" -> 0xC0
 }
@@ -206,7 +211,8 @@ TEST_F(OutputFileTest, WriteFileContents_EmptyInput_WritesZeroTotalBits) {
   EXPECT_EQ(static_cast<unsigned char>(data[17]), 0x00);
 }
 
-TEST_F(OutputFileTest, WriteFileContents_OneCodepointInPrefixes_WritesPackedBits) {
+TEST_F(OutputFileTest,
+       WriteFileContents_OneCodepointInPrefixes_WritesPackedBits) {
   const auto in_path = temp_dir_ / "one_char.txt";
   write_file(in_path, "A");
   auto input = file_handler::load_file(in_path.string());
@@ -227,7 +233,8 @@ TEST_F(OutputFileTest, WriteFileContents_OneCodepointInPrefixes_WritesPackedBits
   EXPECT_EQ(static_cast<unsigned char>(data[18]), 0x80);  // one bit set
 }
 
-TEST_F(OutputFileTest, WriteFileContents_CodepointNotInPrefixes_SkipsCodepoint) {
+TEST_F(OutputFileTest,
+       WriteFileContents_CodepointNotInPrefixes_SkipsCodepoint) {
   const auto in_path = temp_dir_ / "mixed.txt";
   write_file(in_path, "AB");  // B not in prefixes
   auto input = file_handler::load_file(in_path.string());
@@ -257,8 +264,8 @@ TEST_F(OutputFileTest, WriteFileContents_UTF8MultiByte_EncodesCodepoints) {
   ASSERT_NE(input, nullptr);
 
   std::map<char32_t, std::string> prefixes;
-  prefixes[U'\u00E9'] = "0";   // é -> 1 bit 0
-  prefixes[U'\u4E2D'] = "1";   // 中 -> 1 bit 1
+  prefixes[U'\u00E9'] = "0";  // é -> 1 bit 0
+  prefixes[U'\u4E2D'] = "1";  // 中 -> 1 bit 1
   const auto out_path = (temp_dir_ / "contents_utf8.bin").string();
   {
     file_handler::output_file out(out_path);
@@ -266,11 +273,14 @@ TEST_F(OutputFileTest, WriteFileContents_UTF8MultiByte_EncodesCodepoints) {
     file_handler::write_file_contents(std::move(input), prefixes, out);
   }
   const std::string data = read_file_binary(out_path);
-  // Header: count(4) + 2 entries × (codepoint(4)+len(1)+packed(1)) = 4+12 = 16 bytes
-  // total_bits uint64_t = 8 bytes (BE), then 1 packed byte. total_bits = 2, packed = 0x40
+  // Header: count(4) + 2 entries × (codepoint(4)+len(1)+packed(1)) = 4+12 = 16
+  // bytes total_bits uint64_t = 8 bytes (BE), then 1 packed byte. total_bits =
+  // 2, packed = 0x40
   ASSERT_GE(data.size(), 25U);
-  EXPECT_EQ(static_cast<unsigned char>(data[23]), 0x02);  // total_bits low byte = 2
-  EXPECT_EQ(static_cast<unsigned char>(data[24]), 0x40);  // bits "01" -> 01000000
+  EXPECT_EQ(static_cast<unsigned char>(data[23]),
+            0x02);  // total_bits low byte = 2
+  EXPECT_EQ(static_cast<unsigned char>(data[24]),
+            0x40);  // bits "01" -> 01000000
 }
 
 TEST_F(OutputFileTest, WriteFileContents_WithProgressCallback_InvokesCallback) {

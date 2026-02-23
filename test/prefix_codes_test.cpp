@@ -56,7 +56,8 @@ TEST_F(PrefixCodesTest, GeneratePrefixCodes_TwoSymbols_ReturnsOneBitEach) {
   EXPECT_TRUE(is_prefix_free(codes));
 }
 
-TEST_F(PrefixCodesTest, GeneratePrefixCodes_TwoSymbolsDifferentFreq_ShorterCodeForHigherFreq) {
+TEST_F(PrefixCodesTest,
+       GeneratePrefixCodes_TwoSymbolsDifferentFreq_ShorterCodeForHigherFreq) {
   table t = {{U'a', 1}, {U'b', 3}};
   auto codes = generate_prefix_codes(t);
   ASSERT_EQ(codes.size(), 2U);
@@ -67,7 +68,8 @@ TEST_F(PrefixCodesTest, GeneratePrefixCodes_TwoSymbolsDifferentFreq_ShorterCodeF
 
 // --- Three or more symbols ---
 
-TEST_F(PrefixCodesTest, GeneratePrefixCodes_ThreeSymbols_AllPresentAndPrefixFree) {
+TEST_F(PrefixCodesTest,
+       GeneratePrefixCodes_ThreeSymbols_AllPresentAndPrefixFree) {
   table t = {{U'a', 1}, {U'b', 1}, {U'c', 2}};
   auto codes = generate_prefix_codes(t);
   ASSERT_EQ(codes.size(), 3U);
@@ -76,13 +78,15 @@ TEST_F(PrefixCodesTest, GeneratePrefixCodes_ThreeSymbols_AllPresentAndPrefixFree
   EXPECT_TRUE(codes.count(U'c'));
   for (const auto& [cp, code] : codes) {
     for (char ch : code) {
-      EXPECT_TRUE(ch == '0' || ch == '1') << "code for U+" << std::hex << static_cast<unsigned>(cp);
+      EXPECT_TRUE(ch == '0' || ch == '1')
+          << "code for U+" << std::hex << static_cast<unsigned>(cp);
     }
   }
   EXPECT_TRUE(is_prefix_free(codes));
 }
 
-TEST_F(PrefixCodesTest, GeneratePrefixCodes_ThreeSymbols_HigherFreqGetsShorterCode) {
+TEST_F(PrefixCodesTest,
+       GeneratePrefixCodes_ThreeSymbols_HigherFreqGetsShorterCode) {
   table t = {{U'x', 1}, {U'y', 2}, {U'z', 4}};
   auto codes = generate_prefix_codes(t);
   ASSERT_EQ(codes.size(), 3U);
@@ -94,7 +98,8 @@ TEST_F(PrefixCodesTest, GeneratePrefixCodes_ThreeSymbols_HigherFreqGetsShorterCo
   EXPECT_TRUE(is_prefix_free(codes));
 }
 
-TEST_F(PrefixCodesTest, GeneratePrefixCodes_EqualFrequencies_AllCodesSameLengthOrOneShorter) {
+TEST_F(PrefixCodesTest,
+       GeneratePrefixCodes_EqualFrequencies_AllCodesSameLengthOrOneShorter) {
   table t = {{U'a', 1}, {U'b', 1}, {U'c', 1}, {U'd', 1}};
   auto codes = generate_prefix_codes(t);
   ASSERT_EQ(codes.size(), 4U);
@@ -105,7 +110,8 @@ TEST_F(PrefixCodesTest, GeneratePrefixCodes_EqualFrequencies_AllCodesSameLengthO
     min_len = std::min(min_len, code.size());
     max_len = std::max(max_len, code.size());
   }
-  EXPECT_LE(max_len - min_len, 1U) << "canonical codes for equal freqs differ by at most 1 bit";
+  EXPECT_LE(max_len - min_len, 1U)
+      << "canonical codes for equal freqs differ by at most 1 bit";
   EXPECT_TRUE(is_prefix_free(codes));
 }
 
@@ -123,7 +129,8 @@ TEST_F(PrefixCodesTest, GeneratePrefixCodes_UTF8Codepoints_KeysPreserved) {
 
 // --- Larger table ---
 
-TEST_F(PrefixCodesTest, GeneratePrefixCodes_ManySymbols_AllPresentAndPrefixFree) {
+TEST_F(PrefixCodesTest,
+       GeneratePrefixCodes_ManySymbols_AllPresentAndPrefixFree) {
   table t;
   for (int i = 0; i < 20; ++i) {
     t.push_back({static_cast<char32_t>(U'a' + i), i + 1});
@@ -132,7 +139,8 @@ TEST_F(PrefixCodesTest, GeneratePrefixCodes_ManySymbols_AllPresentAndPrefixFree)
   EXPECT_EQ(codes.size(), 20U);
   for (int i = 0; i < 20; ++i) {
     char32_t cp = static_cast<char32_t>(U'a' + i);
-    EXPECT_TRUE(codes.count(cp)) << "missing codepoint U+" << std::hex << static_cast<unsigned>(cp);
+    EXPECT_TRUE(codes.count(cp))
+        << "missing codepoint U+" << std::hex << static_cast<unsigned>(cp);
   }
   EXPECT_TRUE(is_prefix_free(codes));
 }
