@@ -45,3 +45,4 @@ out/*
 
 # ignore enwik9 sample file
 sample/enwik9
+.cursor/*

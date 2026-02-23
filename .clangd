@@ -14,6 +14,9 @@ CompileFlags:
     - -nostdinc++
     - -isystem
     - /opt/homebrew/opt/llvm/include/c++/v1
+    # GMP headers
+    - -isystem
+    - /opt/homebrew/include
 
     # macOS SDK system headers (IMPORTANT when using -nostdinc++)
     # - -isystem

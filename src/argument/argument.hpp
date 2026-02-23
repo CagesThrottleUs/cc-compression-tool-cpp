@@ -3,6 +3,7 @@
 
 #include <cstddef>
 #include <iterator>
+#include <span>
 
 namespace argument {
 
@@ -64,7 +65,8 @@ namespace argument {
  * @brief Validates the command-line arguments.
  * @param args The command-line arguments.
  */
-void validate_arguments(const argv_view& args);
+[[nodiscard]] auto validate_arguments(const argv_view& args)
+    -> std::span<char* const>;
 
 }  // namespace argument
 

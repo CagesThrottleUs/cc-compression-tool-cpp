@@ -6,7 +6,7 @@
 
 namespace argument {
 
-void validate_arguments(const argv_view& args_view) {
+auto validate_arguments(const argv_view& args_view) -> std::span<char* const> {
   std::span<char*> args(args_view);
 
   // Must match exact number of arguments
@@ -27,6 +27,8 @@ void validate_arguments(const argv_view& args_view) {
     throw exceptions::argument_exception("Output file already exists: " +
                                          std::string(args[2]));
   }
+
+  return args;
 }
 
 }  // namespace argument

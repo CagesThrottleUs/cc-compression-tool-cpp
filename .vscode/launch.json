@@ -1,0 +1,63 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug app",
+      "type": "cppdbg",
+      "MIMode": "lldb",
+      "request": "launch",
+      "program": "${workspaceFolder}/out/build/clang-debug/cc-compression-tool-cpp",
+      "args": [],
+      "cwd": "${workspaceFolder}",
+      "stopAtEntry": false,
+      "preLaunchTask": "build (debug)"
+    },
+    {
+      "name": "Debug app (with file)",
+      "type": "cppdbg",
+      "MIMode": "lldb",
+      "request": "launch",
+      "program": "${workspaceFolder}/out/build/clang-debug/cc-compression-tool-cpp",
+      "args": ["${input:inputFilePath}"],
+      "cwd": "${workspaceFolder}",
+      "stopAtEntry": false,
+      "preLaunchTask": "build (debug)"
+    },
+    {
+      "name": "Debug app (input + output)",
+      "type": "cppdbg",
+      "MIMode": "lldb",
+      "request": "launch",
+      "program": "${workspaceFolder}/out/build/clang-debug/cc-compression-tool-cpp",
+      "args": ["${input:inputFilePath}", "${input:outputFilePath}"],
+      "cwd": "${workspaceFolder}",
+      "stopAtEntry": false,
+      "preLaunchTask": "build (debug)"
+    },
+    {
+      "name": "Debug tests",
+      "type": "cppdbg",
+      "MIMode": "lldb",
+      "request": "launch",
+      "program": "${workspaceFolder}/out/build/clang-debug/cc_compression_tool_test",
+      "args": [],
+      "cwd": "${workspaceFolder}",
+      "stopAtEntry": false,
+      "preLaunchTask": "build (debug)"
+    }
+  ],
+  "inputs": [
+    {
+      "id": "inputFilePath",
+      "type": "promptString",
+      "description": "Input file (required)",
+      "default": "sample.txt"
+    },
+    {
+      "id": "outputFilePath",
+      "type": "promptString",
+      "description": "Output file (optional)",
+      "default": ""
+    }
+  ]
+}
