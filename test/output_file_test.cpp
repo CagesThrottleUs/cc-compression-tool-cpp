@@ -5,6 +5,8 @@
 #include <fstream>
 #include <map>
 #include <string>
+#include <utility>
+#include <vector>
 
 #include "exceptions/file_operation_exception.hpp"
 #include "file_handler/input_file.hpp"
@@ -269,6 +271,37 @@ TEST_F(OutputFileTest, WriteFileContents_UTF8MultiByte_EncodesCodepoints) {
   ASSERT_GE(data.size(), 25U);
   EXPECT_EQ(static_cast<unsigned char>(data[23]), 0x02);  // total_bits low byte = 2
   EXPECT_EQ(static_cast<unsigned char>(data[24]), 0x40);  // bits "01" -> 01000000
+}
+
+TEST_F(OutputFileTest, WriteFileContents_WithProgressCallback_InvokesCallback) {
+  const auto in_path = temp_dir_ / "progress_in.txt";
+  write_file(in_path, "AAA");
+  auto input = file_handler::load_file(in_path.string());
+  ASSERT_NE(input, nullptr);
+  const std::size_t total_bytes = input->size();
+
+  std::map<char32_t, std::string> prefixes;
+  prefixes[U'A'] = "1";
+  std::vector<std::pair<std::size_t, std::size_t>> progress_calls;
+  file_handler::write_progress_callback progress =
+      [&progress_calls](std::size_t current, std::size_t total) {
+        progress_calls.emplace_back(current, total);
+      };
+
+  const auto out_path = (temp_dir_ / "progress_out.bin").string();
+  {
+    file_handler::output_file out(out_path);
+    file_handler::write_header(prefixes, out);
+    file_handler::write_file_contents(std::move(input), prefixes, out,
+                                      &progress);
+  }
+
+  EXPECT_FALSE(progress_calls.empty()) << "Progress callback should be invoked";
+  EXPECT_EQ(progress_calls.back().first, total_bytes);
+  EXPECT_EQ(progress_calls.back().second, total_bytes);
+  for (const auto& [current, total] : progress_calls) {
+    EXPECT_LE(current, total);
+  }
 }
 
 }  // namespace
