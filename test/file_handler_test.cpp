@@ -1,8 +1,8 @@
+#include <gtest/gtest.h>
+
 #include <filesystem>
 #include <fstream>
 #include <string>
-
-#include <gtest/gtest.h>
 
 #include "exceptions/file_operation_exception.hpp"
 #include "file_handler/input_file.hpp"
@@ -12,8 +12,9 @@ namespace {
 class FileHandlerTest : public ::testing::Test {
  protected:
   void SetUp() override {
-    temp_dir_ = std::filesystem::temp_directory_path() /
-                ("cc_compression_file_handler_test_" + std::to_string(::getpid()));
+    temp_dir_ =
+        std::filesystem::temp_directory_path() /
+        ("cc_compression_file_handler_test_" + std::to_string(::getpid()));
     std::filesystem::create_directories(temp_dir_);
   }
 
@@ -34,13 +35,11 @@ class FileHandlerTest : public ::testing::Test {
 TEST_F(FileHandlerTest, LoadFile_NonexistentPath_ThrowsFileOperationException) {
   const auto path = (temp_dir_ / "nonexistent.txt").string();
   EXPECT_THROW(
-      {
-        file_handler::load_file(path);
-      },
-      exceptions::file_operation_exception);
+      { file_handler::load_file(path); }, exceptions::file_operation_exception);
 }
 
-TEST_F(FileHandlerTest, LoadFile_NonexistentPath_MessageContainsFileDoesNotExist) {
+TEST_F(FileHandlerTest,
+       LoadFile_NonexistentPath_MessageContainsFileDoesNotExist) {
   const auto path = (temp_dir_ / "nonexistent.txt").string();
   try {
     file_handler::load_file(path);
@@ -54,10 +53,7 @@ TEST_F(FileHandlerTest, LoadFile_NonexistentPath_MessageContainsFileDoesNotExist
 TEST_F(FileHandlerTest, LoadFile_DirectoryPath_ThrowsFileOperationException) {
   const auto path = temp_dir_.string();
   EXPECT_THROW(
-      {
-        file_handler::load_file(path);
-      },
-      exceptions::file_operation_exception);
+      { file_handler::load_file(path); }, exceptions::file_operation_exception);
 }
 
 TEST_F(FileHandlerTest, LoadFile_DirectoryPath_MessageContainsNotARegularFile) {

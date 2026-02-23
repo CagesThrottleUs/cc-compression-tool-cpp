@@ -1,8 +1,8 @@
+#include <gtest/gtest.h>
+
 #include <filesystem>
 #include <fstream>
 #include <string>
-
-#include <gtest/gtest.h>
 
 #include "argument/argument.hpp"
 #include "exceptions/argument_exception.hpp"
@@ -32,10 +32,7 @@ TEST_F(ArgumentsTest, TooFewArguments_ThrowsUsage) {
   char* argv[] = {const_cast<char*>("prog")};
   argument::argv_view view(argv, 1);
   EXPECT_THROW(
-      {
-        argument::validate_arguments(view);
-      },
-      exceptions::argument_exception);
+      { argument::validate_arguments(view); }, exceptions::argument_exception);
 }
 
 TEST_F(ArgumentsTest, TooManyArguments_ThrowsUsage) {
@@ -46,10 +43,7 @@ TEST_F(ArgumentsTest, TooManyArguments_ThrowsUsage) {
   char* argv[] = {prog.data(), in.data(), out.data(), extra.data()};
   argument::argv_view view(argv, 4);
   EXPECT_THROW(
-      {
-        argument::validate_arguments(view);
-      },
-      exceptions::argument_exception);
+      { argument::validate_arguments(view); }, exceptions::argument_exception);
 }
 
 TEST_F(ArgumentsTest, TwoArgs_InputFileMissing_Throws) {
