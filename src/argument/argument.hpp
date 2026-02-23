@@ -3,9 +3,23 @@
 
 #include <cstddef>
 #include <iterator>
-#include <span>
+#include <string>
 
 namespace argument {
+
+/**
+ * @brief Operation mode: compress (default) or decompress.
+ */
+enum class mode { compress, decompress }; // NOLINT(performance-enum-size)
+
+/**
+ * @brief Result of successful argument validation.
+ */
+struct validated_args {
+  mode operation{mode::compress};
+  std::string input_path;
+  std::string output_path;
+};
 
 /**
  * @brief A lightweight, non-owning view over the command-line arguments.
@@ -63,17 +77,12 @@ namespace argument {
 
 /**
  * @brief Validates the command-line arguments.
+ * Parses optional --compress or --decompress (default is compress), then
+ * input path and optional output path.
  * @param args The command-line arguments.
+ * @return Validated operation mode, input path, and output path.
  */
-[[nodiscard]] auto validate_arguments(const argv_view& args)
-    -> std::span<char* const>;
-
-/**
- * @brief Returns the output file path.
- * @param args The command-line arguments.
- */
-[[nodiscard]] auto get_output_file_path(const std::span<char* const>& args)
-    -> std::string;
+[[nodiscard]] auto validate_arguments(const argv_view& args) -> validated_args;
 
 }  // namespace argument
 
