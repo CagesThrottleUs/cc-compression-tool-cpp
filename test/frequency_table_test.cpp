@@ -115,7 +115,8 @@ TEST_F(FrequencyTableTest, BuildFrequencyTable_ResultSortedAscendingByCount) {
   EXPECT_LE(tbl.at(1).count, tbl.at(2).count);
 }
 
-TEST_F(FrequencyTableTest, BuildFrequencyTable_WithProgressCallback_InvokesCallback) {
+TEST_F(FrequencyTableTest,
+       BuildFrequencyTable_WithProgressCallback_InvokesCallback) {
   const auto path = temp_dir_ / "progress.txt";
   write_file(path, "aabbcc");
   auto input = file_handler::load_file(path.string());
@@ -128,7 +129,8 @@ TEST_F(FrequencyTableTest, BuildFrequencyTable_WithProgressCallback_InvokesCallb
         progress_calls.emplace_back(current, total);
       };
 
-  auto tbl = frequency_table::build_frequency_table(std::move(input), &progress);
+  auto tbl =
+      frequency_table::build_frequency_table(std::move(input), &progress);
   ASSERT_EQ(tbl.size(), 3U);
 
   EXPECT_FALSE(progress_calls.empty()) << "Progress callback should be invoked";
@@ -157,7 +159,13 @@ TEST_F(FrequencyTableTest, BuildFrequencyTable_UTF8Latin1_CountsCorrect) {
 
 TEST_F(FrequencyTableTest, BuildFrequencyTable_UTF8CJK_CountsCorrect) {
   // 中 = U+4E2D (3 bytes in UTF-8)
-  const std::string content = "\xe4" "\xb8" "\xad" "\xe4" "\xb8" "\xad";
+  const std::string content =
+      "\xe4"
+      "\xb8"
+      "\xad"
+      "\xe4"
+      "\xb8"
+      "\xad";
   const auto path = temp_dir_ / "utf8_cjk.txt";
   write_file(path, content);
   auto input = file_handler::load_file(path.string());
@@ -170,7 +178,8 @@ TEST_F(FrequencyTableTest, BuildFrequencyTable_UTF8CJK_CountsCorrect) {
 }
 
 TEST_F(FrequencyTableTest, BuildFrequencyTable_MixedASCIIAndUTF8_AllEntries) {
-  // a, é, a, 中, a (UTF-8: é = C3 A9, 中 = E4 B8 AD; each \x must be in its own literal)
+  // a, é, a, 中, a (UTF-8: é = C3 A9, 中 = E4 B8 AD; each \x must be in its own
+  // literal)
   const char* content = reinterpret_cast<const char*>(u8"aéa中a");
   const std::string content_str(content);
   const auto path = temp_dir_ / "mixed.txt";

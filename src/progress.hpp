@@ -27,9 +27,8 @@ inline void print_progress(std::size_t current, std::size_t total,
   const int pct = static_cast<int>(
       std::min(100.0, std::round(100.0 * static_cast<double>(current) /
                                  static_cast<double>(total))));
-  const int filled =
-      static_cast<int>(std::round(static_cast<double>(pct) / 100.0 *
-                                  static_cast<double>(BAR_WIDTH)));
+  const int filled = static_cast<int>(std::round(
+      static_cast<double>(pct) / 100.0 * static_cast<double>(BAR_WIDTH)));
   std::cout << '\r' << label << " [";
   for (int i = 0; i < BAR_WIDTH; ++i) {
     char segment = ' ';

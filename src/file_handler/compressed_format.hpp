@@ -28,17 +28,17 @@ using read_progress_callback =
 /**
  * @brief Reads encoded bits from stream, decodes using the prefix map, and
  *        writes UTF-8 to the output file.
- * @param stream Binary input stream positioned after the header (at total_bits).
+ * @param stream Binary input stream positioned after the header (at
+ * total_bits).
  * @param prefixes Map from codepoint to code string (from read_header).
  * @param file Output file to write decoded UTF-8.
  * @param progress Optional progress callback (current_bits, total_bits).
  * @throws exceptions::file_operation_exception On read or decode error.
  */
-void decode_and_write(
-    std::istream& stream,
-    const std::map<char32_t, std::string>& prefixes,
-    output_file& file,
-    read_progress_callback* progress = nullptr);
+void decode_and_write(std::istream& stream,
+                      const std::map<char32_t, std::string>& prefixes,
+                      output_file& file,
+                      read_progress_callback* progress = nullptr);
 
 }  // namespace file_handler
 

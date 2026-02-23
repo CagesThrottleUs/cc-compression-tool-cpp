@@ -22,7 +22,7 @@ inline void run(const argument::validated_args& validated) {
   std::ifstream stream(validated.input_path, std::ios::binary);
   if (!stream.is_open()) {
     throw exceptions::file_operation_exception("Failed to open file: " +
-                                                validated.input_path);
+                                               validated.input_path);
   }
 
   std::cout << "Reading header...\n";

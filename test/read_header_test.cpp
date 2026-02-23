@@ -66,7 +66,8 @@ TEST(ReadHeaderTest, TwoEntries_RoundTrip) {
   std::filesystem::remove(path);
   EXPECT_EQ(prefixes.size(), expected.size());
   for (const auto& [cp, code] : expected) {
-    EXPECT_EQ(prefixes.at(cp), code) << "codepoint " << static_cast<std::uint32_t>(cp);
+    EXPECT_EQ(prefixes.at(cp), code)
+        << "codepoint " << static_cast<std::uint32_t>(cp);
   }
 }
 

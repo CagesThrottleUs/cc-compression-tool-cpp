@@ -15,9 +15,8 @@ namespace frequency_table {
 
 constexpr auto ASCII_COUNT = 128;
 
-auto build_frequency_table(
-    std::unique_ptr<file_handler::input_file> input,
-    build_progress_callback* progress) -> table {
+auto build_frequency_table(std::unique_ptr<file_handler::input_file> input,
+                           build_progress_callback* progress) -> table {
   std::array<multiprecision::mpz_int, ASCII_COUNT> ascii_counts{{0}};
   boost::unordered_flat_map<char32_t, multiprecision::mpz_int> unicode_counts;
 
@@ -39,8 +38,7 @@ auto build_frequency_table(
         unicode_counts[codepoint]++;
       }
       if (progress != nullptr && total_bytes > 0) {
-        const auto current_bytes =
-            static_cast<std::size_t>(curr - data_start);
+        const auto current_bytes = static_cast<std::size_t>(curr - data_start);
         if (current_bytes - last_reported >= PROGRESS_INTERVAL_BYTES ||
             curr >= end) {
           (*progress)(current_bytes, total_bytes);

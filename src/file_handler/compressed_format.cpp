@@ -40,8 +40,7 @@ auto unpack_bits(std::istream* stream, std::size_t num_bits) -> std::string {
   if (num_bits == 0) {
     return {};
   }
-  const std::size_t num_bytes =
-      (num_bits + BITS_PER_BYTE - 1) / BITS_PER_BYTE;
+  const std::size_t num_bytes = (num_bits + BITS_PER_BYTE - 1) / BITS_PER_BYTE;
   std::string packed(num_bytes, '\0');
   if (!stream->read(packed.data(), static_cast<std::streamsize>(num_bytes)) ||
       stream->gcount() != static_cast<std::streamsize>(num_bytes)) {
@@ -72,7 +71,9 @@ class BitReader {
     refill();
   }
 
-  [[nodiscard]] auto has_next() const -> bool { return bits_read_ < total_bits_; }
+  [[nodiscard]] auto has_next() const -> bool {
+    return bits_read_ < total_bits_;
+  }
 
   auto next_bit() -> bool {
     if (buffer_bit_cursor_ >= buffer_.size() * BITS_PER_BYTE) {
@@ -110,8 +111,7 @@ class BitReader {
       return;
     }
     const std::size_t to_read = std::min(
-        DECODE_BUFFER_BYTES,
-        (remaining + BITS_PER_BYTE - 1) / BITS_PER_BYTE);
+        DECODE_BUFFER_BYTES, (remaining + BITS_PER_BYTE - 1) / BITS_PER_BYTE);
     buffer_.resize(to_read);
     if (!stream_->read(buffer_.data(), static_cast<std::streamsize>(to_read))) {
       throw exceptions::file_operation_exception(
@@ -123,7 +123,8 @@ class BitReader {
 };
 
 /**
- * Decode trie node. Layout avoids -Wpadded: child, codepoint, is_leaf, explicit pad.
+ * Decode trie node. Layout avoids -Wpadded: child, codepoint, is_leaf, explicit
+ * pad.
  */
 struct DecodeNode {
   std::array<std::size_t, 2> child{INVALID_NODE, INVALID_NODE};
@@ -132,8 +133,7 @@ struct DecodeNode {
   std::array<uint8_t, 3> pad_{};  // explicit padding to alignment boundary
 };
 
-auto build_decode_trie(
-    const std::map<char32_t, std::string>& prefixes)
+auto build_decode_trie(const std::map<char32_t, std::string>& prefixes)
     -> std::vector<DecodeNode> {
   std::vector<DecodeNode> nodes;
   nodes.emplace_back();
@@ -145,7 +145,8 @@ auto build_decode_trie(
       const std::size_t new_idx = nodes.size();
       child_ref = new_idx;
       nodes.emplace_back();
-      return new_idx;  // return saved index; child_ref may be invalid after realloc
+      return new_idx;  // return saved index; child_ref may be invalid after
+                       // realloc
     }
     return child_ref;
   };
@@ -188,11 +189,9 @@ auto read_header(std::istream& stream) -> std::map<char32_t, std::string> {
   return prefixes;
 }
 
-void decode_and_write(
-    std::istream& stream,
-    const std::map<char32_t, std::string>& prefixes,
-    output_file& file,
-    read_progress_callback* progress) {
+void decode_and_write(std::istream& stream,
+                      const std::map<char32_t, std::string>& prefixes,
+                      output_file& file, read_progress_callback* progress) {
   std::istream* stream_ptr = &stream;
   const auto total_bits = read_be<uint64_t>(stream_ptr);
   if (total_bits == 0) {

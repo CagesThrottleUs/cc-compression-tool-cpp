@@ -10,7 +10,7 @@ namespace argument {
 /**
  * @brief Operation mode: compress (default) or decompress.
  */
-enum class mode { compress, decompress }; // NOLINT(performance-enum-size)
+enum class mode { compress, decompress };  // NOLINT(performance-enum-size)
 
 /**
  * @brief Result of successful argument validation.

@@ -42,8 +42,8 @@ TEST_F(DecodeAndWriteTest, SingleCodepoint_DecodesToUtf8) {
   {
     file_handler::output_file out(compressed_path);
     file_handler::write_header(prefixes, out);
-    write_be64(out, 1);   // total_bits = 1
-    out.write(std::string(1, '\0'));   // one bit 0
+    write_be64(out, 1);               // total_bits = 1
+    out.write(std::string(1, '\0'));  // one bit 0
   }
 
   std::ifstream stream(compressed_path, std::ios::binary);
@@ -68,7 +68,7 @@ TEST_F(DecodeAndWriteTest, TwoCodepoints_DecodesCorrectly) {
   {
     file_handler::output_file out(compressed_path);
     file_handler::write_header(prefixes, out);
-    write_be64(out, 2);   // total_bits = 2
+    write_be64(out, 2);                 // total_bits = 2
     out.write(std::string(1, '\x80'));  // bits "10" -> 'b'
   }
 
