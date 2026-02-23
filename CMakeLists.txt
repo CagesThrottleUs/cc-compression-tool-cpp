@@ -8,6 +8,8 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # Set src files
 set(SRC_FILES
   src/main.cpp
+  src/exceptions/exceptions.cpp
+  src/argument/arguments.cpp
 )
 
 add_executable(cc-compression-tool-cpp ${SRC_FILES})
