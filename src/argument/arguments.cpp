@@ -31,4 +31,11 @@ auto validate_arguments(const argv_view& args_view) -> std::span<char* const> {
   return args;
 }
 
+auto get_output_file_path(const std::span<char* const>& args) -> std::string {
+  if (args.size() == 3) {
+    return {args[2]};
+  }
+  return "output.compressed";
+}
+
 }  // namespace argument
