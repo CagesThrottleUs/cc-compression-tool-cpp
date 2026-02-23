@@ -67,6 +67,7 @@ add_executable(cc_compression_tool_test
     test/hello_test.cpp
     test/arguments_test.cpp
     test/file_handler_test.cpp
+    test/frequency_table_test.cpp
     src/argument/arguments.cpp
     src/exceptions/exceptions.cpp
     src/file_handler/input_file.cpp
@@ -89,4 +90,6 @@ target_link_libraries(cc_compression_tool_test PRIVATE
 target_compile_definitions(cc_compression_tool_test PRIVATE BOOST_MULTIPRECISION_USE_GMP)
 
 include(GoogleTest)
-gtest_discover_tests(cc_compression_tool_test)
+gtest_discover_tests(cc_compression_tool_test
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+)
