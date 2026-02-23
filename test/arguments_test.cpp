@@ -19,13 +19,21 @@ class ArgumentsTest : public ::testing::Test {
     existing_output_ = temp_dir_ / "existing_output.txt";
     std::ofstream(existing_input_).put('x');
     std::ofstream(existing_output_).put('x');
+    // Use temp dir as cwd so default output path "output.compressed" does not
+    // conflict with an existing file in project/build directory.
+    saved_cwd_ = std::filesystem::current_path();
+    std::filesystem::current_path(temp_dir_);
   }
 
-  void TearDown() override { std::filesystem::remove_all(temp_dir_); }
+  void TearDown() override {
+    std::filesystem::current_path(saved_cwd_);
+    std::filesystem::remove_all(temp_dir_);
+  }
 
   std::filesystem::path temp_dir_;
   std::filesystem::path existing_input_;
   std::filesystem::path existing_output_;
+  std::filesystem::path saved_cwd_;
 };
 
 TEST_F(ArgumentsTest, TooFewArguments_ThrowsUsage) {
@@ -122,8 +130,82 @@ TEST_F(ArgumentsTest, UsageMessage_ContainsProgramName) {
   } catch (const exceptions::argument_exception& e) {
     std::string msg(e.what());
     EXPECT_NE(msg.find("my_tool"), std::string::npos);
-    EXPECT_NE(msg.find("text_file_path"), std::string::npos);
+    EXPECT_NE(msg.find("input_file"), std::string::npos);
   }
+}
+
+TEST_F(ArgumentsTest, TwoArgs_DefaultIsCompress) {
+  std::string prog = "prog";
+  std::string in = existing_input_.string();
+  char* argv[] = {prog.data(), in.data()};
+  argument::argv_view view(argv, 2);
+  auto args = argument::validate_arguments(view);
+  EXPECT_EQ(args.operation, argument::mode::compress);
+  EXPECT_EQ(args.input_path, in);
+  EXPECT_EQ(args.output_path, "output.compressed");
+}
+
+TEST_F(ArgumentsTest, ExplicitCompress_TwoArgs) {
+  std::string prog = "prog";
+  std::string in = existing_input_.string();
+  char* argv[] = {const_cast<char*>("prog"), const_cast<char*>("--compress"),
+                  in.data()};
+  argument::argv_view view(argv, 3);
+  auto args = argument::validate_arguments(view);
+  EXPECT_EQ(args.operation, argument::mode::compress);
+  EXPECT_EQ(args.input_path, in);
+  EXPECT_EQ(args.output_path, "output.compressed");
+}
+
+TEST_F(ArgumentsTest, ExplicitCompress_ThreeArgs) {
+  std::string prog = "prog";
+  std::string in = existing_input_.string();
+  std::string out = (temp_dir_ / "out_compress.txt").string();
+  char* argv[] = {prog.data(), const_cast<char*>("--compress"), in.data(),
+                  out.data()};
+  argument::argv_view view(argv, 4);
+  auto args = argument::validate_arguments(view);
+  EXPECT_EQ(args.operation, argument::mode::compress);
+  EXPECT_EQ(args.input_path, in);
+  EXPECT_EQ(args.output_path, out);
+}
+
+TEST_F(ArgumentsTest, ExplicitDecompress_TwoArgs) {
+  std::string prog = "prog";
+  std::string in = existing_input_.string();
+  char* argv[] = {prog.data(), const_cast<char*>("--decompress"), in.data()};
+  argument::argv_view view(argv, 3);
+  auto args = argument::validate_arguments(view);
+  EXPECT_EQ(args.operation, argument::mode::decompress);
+  EXPECT_EQ(args.input_path, in);
+  EXPECT_EQ(args.output_path, "output.decompressed");
+}
+
+TEST_F(ArgumentsTest, ExplicitDecompress_ThreeArgs) {
+  std::string prog = "prog";
+  std::string in = existing_input_.string();
+  std::string out = (temp_dir_ / "out_decompress.txt").string();
+  char* argv[] = {prog.data(), const_cast<char*>("--decompress"), in.data(),
+                  out.data()};
+  argument::argv_view view(argv, 4);
+  auto args = argument::validate_arguments(view);
+  EXPECT_EQ(args.operation, argument::mode::decompress);
+  EXPECT_EQ(args.input_path, in);
+  EXPECT_EQ(args.output_path, out);
+}
+
+TEST_F(ArgumentsTest, OnlyCompressFlag_ThrowsMissingInput) {
+  char* argv[] = {const_cast<char*>("prog"), const_cast<char*>("--compress")};
+  argument::argv_view view(argv, 2);
+  EXPECT_THROW(auto args = argument::validate_arguments(view),
+               exceptions::argument_exception);
+}
+
+TEST_F(ArgumentsTest, OnlyDecompressFlag_ThrowsMissingInput) {
+  char* argv[] = {const_cast<char*>("prog"), const_cast<char*>("--decompress")};
+  argument::argv_view view(argv, 2);
+  EXPECT_THROW(auto args = argument::validate_arguments(view),
+               exceptions::argument_exception);
 }
 
 }  // namespace
