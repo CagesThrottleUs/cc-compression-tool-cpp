@@ -80,10 +80,39 @@ One-liner for a Release build and test:
 cmake --preset clang-release && cmake --build out/build/clang-release && ctest --test-dir out/build/clang-release --output-on-failure
 ```
 
+Tests include unit tests (Googletest) and a **round-trip test** (`RoundTripEncodeDecode`): the tool encodes `sample/test.txt` to a compressed file, decodes it back, and `diff` confirms the decoded file matches the original. This test requires `sample/test.txt` to exist.
+
 The main executable (after building) is:
 
 - **Debug:** `out/build/clang-debug/cc-compression-tool-cpp`
 - **Release:** `out/build/clang-release/cc-compression-tool-cpp`
+
+---
+
+## Usage
+
+The tool supports **compress** (default) and **decompress**. Output paths are optional; defaults are `output.compressed` (compress) and `output.decompressed` (decompress).
+
+**Compress (default):**
+```bash
+./cc-compression-tool-cpp <input_file> [output_file]
+./cc-compression-tool-cpp --compress <input_file> [output_file]
+```
+
+**Decompress:**
+```bash
+./cc-compression-tool-cpp --decompress <compressed_file> [output_file]
+```
+
+**Examples:**
+```bash
+./cc-compression-tool-cpp sample/test.txt                    # -> output.compressed
+./cc-compression-tool-cpp sample/test.txt out.compressed     # -> out.compressed
+./cc-compression-tool-cpp --decompress out.compressed       # -> output.decompressed
+./cc-compression-tool-cpp --decompress out.compressed out.txt
+```
+
+Input and output paths must exist (input) or not exist (output) as appropriate. The compressed format is custom: header (prefix code table) then packed bit stream.
 
 ---
 
@@ -96,12 +125,18 @@ The main executable (after building) is:
 ├── include/            # Project include path (optional)
 ├── src/                # Application source and headers
 │   ├── main.cpp
-│   ├── argument/       # CLI arguments
+│   ├── compress.hpp    # Compression entry (uses progress, file_handler, frequency_table, prefix_codes)
+│   ├── decompress.hpp  # Decompression entry (read_header, decode_and_write, progress)
+│   ├── progress.hpp    # Shared progress bar (used by compress and decompress)
+│   ├── argument/       # CLI (--compress, --decompress, paths)
 │   ├── exceptions/     # Custom exceptions
-│   ├── file_handler/   # Input file handling
-│   └── frequency_table/ # Character frequency table (Huffman)
-├── test/               # Googletest tests (hello, arguments, file_handler, frequency_table)
-├── sample/             # Sample data (e.g. test.txt)
+│   ├── file_handler/   # Input/output files; write_header, read_header, decode_and_write
+│   ├── frequency_table/# Character frequency table (Huffman)
+│   └── prefix_codes/   # Huffman prefix code generation
+├── test/               # Googletest + round-trip CTest
+│   ├── *_test.cpp      # Unit tests (arguments, file_handler, output_file, read_header, decode_and_write, decompress, …)
+│   └── roundtrip_encode_decode.cmake  # CTest: encode sample/test.txt, decode, diff
+├── sample/             # Sample data (test.txt used by round-trip test)
 └── out/                # Build and install outputs (generated)
 ```
 

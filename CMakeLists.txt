@@ -32,6 +32,7 @@ set(SRC_FILES
   src/argument/arguments.cpp
   src/file_handler/input_file.cpp
   src/file_handler/output_file.cpp
+  src/file_handler/compressed_format.cpp
   src/frequency_table/frequency_table.cpp
   src/prefix_codes/prefix_codes.cpp
 )
@@ -64,13 +65,16 @@ FetchContent_MakeAvailable(googletest)
 
 enable_testing()
 
-add_executable(cc_compression_tool_test 
+add_executable(cc_compression_tool_test
     test/hello_test.cpp
     test/arguments_test.cpp
     test/file_handler_test.cpp
     test/output_file_test.cpp
     test/frequency_table_test.cpp
     test/prefix_codes_test.cpp
+    test/read_header_test.cpp
+    test/decode_and_write_test.cpp
+    test/decompress_test.cpp
     ${SRC_FILES}
 )
 
@@ -92,4 +96,16 @@ target_compile_definitions(cc_compression_tool_test PRIVATE BOOST_MULTIPRECISION
 include(GoogleTest)
 gtest_discover_tests(cc_compression_tool_test
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+)
+
+# Round-trip test: encode sample/test.txt, decode, diff (files must match)
+set(ROUNDTRIP_COMPRESSED "${CMAKE_BINARY_DIR}/roundtrip.compressed")
+set(ROUNDTRIP_DECOMPRESSED "${CMAKE_BINARY_DIR}/roundtrip.txt")
+add_test(NAME RoundTripEncodeDecode
+  COMMAND ${CMAKE_COMMAND}
+    -DEXE=$<TARGET_FILE:${PROJECT_NAME}>
+    -DINPUT=${CMAKE_SOURCE_DIR}/sample/test.txt
+    -DCOMPRESSED=${ROUNDTRIP_COMPRESSED}
+    -DDECOMPRESSED=${ROUNDTRIP_DECOMPRESSED}
+    -P ${CMAKE_SOURCE_DIR}/test/roundtrip_encode_decode.cmake
 )

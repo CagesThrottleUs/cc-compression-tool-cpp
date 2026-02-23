@@ -2,6 +2,7 @@
 
 #include <utf8.h>
 
+#include <cstddef>
 #include <cstdint>
 #include <iterator>
 #include <limits>
@@ -46,8 +47,7 @@ auto write_be(output_file& file, T value) noexcept -> void {
   std::string buf(byte_count, '\0');
   auto remaining = static_cast<uint64_t>(value);
   for (std::size_t idx = 0; idx < byte_count; ++idx) {
-    buf.at(byte_count - 1 - idx) =
-        static_cast<char>(remaining & LOW_BYTE_MASK);
+    buf.at(byte_count - 1 - idx) = static_cast<char>(remaining & LOW_BYTE_MASK);
     remaining >>= BITS_PER_BYTE;
   }
   file.write(buf);
@@ -65,7 +65,8 @@ auto write_header(const std::map<char32_t, std::string>& prefixes,
 
   for (const auto& [codepoint, code_str] : prefixes) {
     const auto code_len = code_str.size();
-    if (code_len > static_cast<std::size_t>(std::numeric_limits<uint8_t>::max())) {
+    if (code_len >
+        static_cast<std::size_t>(std::numeric_limits<uint8_t>::max())) {
       continue;
     }
     write_be(file, static_cast<uint32_t>(codepoint));
@@ -77,18 +78,17 @@ auto write_header(const std::map<char32_t, std::string>& prefixes,
   }
 }
 
-auto write_file_contents(
-    std::unique_ptr<file_handler::input_file> input,
-    const std::map<char32_t, std::string>& prefixes,
-    output_file& file,
-    write_progress_callback* progress) noexcept -> void {
+auto write_file_contents(std::unique_ptr<file_handler::input_file> input,
+                         const std::map<char32_t, std::string>& prefixes,
+                         output_file& file,
+                         write_progress_callback* progress) noexcept -> void {
   if (!input || !input->good()) {
     return;
   }
 
-  constexpr std::size_t kInitialBufferReserve = 4096;
+  constexpr std::size_t INIT_BUFFER_SIZE = 4096;
   std::vector<char> bit_buffer;
-  bit_buffer.reserve(kInitialBufferReserve);
+  bit_buffer.reserve(INIT_BUFFER_SIZE);
 
   const auto* const data_start = input->data();
   const std::size_t total_bytes = input->size();
@@ -96,7 +96,7 @@ auto write_file_contents(
       std::next(data_start, static_cast<std::ptrdiff_t>(total_bytes));
   const auto* curr = data_start;
   std::size_t last_reported = 0;
-  constexpr std::size_t kProgressIntervalBytes = 65536;
+  constexpr std::size_t PROGRESS_INTERVAL_BYTES = 65536;
 
   while (curr < end) {
     const char32_t codepoint = utf8::next(curr, end);
@@ -108,9 +108,8 @@ auto write_file_contents(
       bit_buffer.push_back(bit_char);
     }
     if (progress != nullptr && total_bytes > 0) {
-      const auto current_bytes =
-          static_cast<std::size_t>(curr - data_start);
-      if (current_bytes - last_reported >= kProgressIntervalBytes ||
+      const auto current_bytes = static_cast<std::size_t>(curr - data_start);
+      if (current_bytes - last_reported >= PROGRESS_INTERVAL_BYTES ||
           curr >= end) {
         (*progress)(current_bytes, total_bytes);
         last_reported = current_bytes;

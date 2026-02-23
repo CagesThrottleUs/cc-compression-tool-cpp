@@ -49,3 +49,4 @@ sample/enwik9
 cmake_test_discovery_*.json
 
 *.compressed
+out.txt
