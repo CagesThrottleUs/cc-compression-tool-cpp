@@ -8,7 +8,7 @@
 
 namespace progress {
 
-constexpr int kBarWidth = 40;
+constexpr int BAR_WIDTH = 40;
 
 /**
  * @brief Prints a progress bar to stdout.
@@ -29,9 +29,9 @@ inline void print_progress(std::size_t current, std::size_t total,
                                  static_cast<double>(total))));
   const int filled =
       static_cast<int>(std::round(static_cast<double>(pct) / 100.0 *
-                                  static_cast<double>(kBarWidth)));
+                                  static_cast<double>(BAR_WIDTH)));
   std::cout << '\r' << label << " [";
-  for (int i = 0; i < kBarWidth; ++i) {
+  for (int i = 0; i < BAR_WIDTH; ++i) {
     char segment = ' ';
     if (i < filled) {
       segment = '=';

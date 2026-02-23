@@ -27,7 +27,7 @@ auto build_frequency_table(
       std::next(data_start, static_cast<std::ptrdiff_t>(total_bytes));
   const auto* curr = data_start;
   std::size_t last_reported = 0;
-  constexpr std::size_t kProgressIntervalBytes = 65536;
+  constexpr std::size_t PROGRESS_INTERVAL_BYTES = 65536;
 
   try {
     while (curr < end) {
@@ -41,7 +41,7 @@ auto build_frequency_table(
       if (progress != nullptr && total_bytes > 0) {
         const auto current_bytes =
             static_cast<std::size_t>(curr - data_start);
-        if (current_bytes - last_reported >= kProgressIntervalBytes ||
+        if (current_bytes - last_reported >= PROGRESS_INTERVAL_BYTES ||
             curr >= end) {
           (*progress)(current_bytes, total_bytes);
           last_reported = current_bytes;
