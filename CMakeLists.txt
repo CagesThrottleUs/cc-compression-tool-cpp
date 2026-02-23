@@ -1,29 +1,59 @@
-cmake_minimum_required(VERSION 3.10.0)
+cmake_minimum_required(VERSION 3.15.0)
 project(cc-compression-tool-cpp VERSION 0.1.0 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-# Set src files
+# ----------------------------- Find Packages -----------------------------
+
+# 1. Boost (iostreams is compiled, others are headers)
+find_package(Boost REQUIRED COMPONENTS iostreams CONFIG)
+
+# 2. GMP (Search for headers and library)
+find_path(GMP_INCLUDE_DIR NAMES gmp.h)
+find_library(GMP_LIBRARY NAMES gmp)
+
+if(NOT GMP_INCLUDE_DIR OR NOT GMP_LIBRARY)
+    message(FATAL_ERROR "GMP not found. Run 'brew install gmp' on macOS.")
+endif()
+
+# Create a "Formal" CMake Target for GMP (Cleaner than using variables)
+add_library(GMP::GMP UNKNOWN IMPORTED)
+set_target_properties(GMP::GMP PROPERTIES
+    INTERFACE_INCLUDE_DIRECTORIES "${GMP_INCLUDE_DIR}"
+    IMPORTED_LOCATION "${GMP_LIBRARY}"
+)
+
+# ----------------------------- Main Executable -----------------------------
+
 set(SRC_FILES
   src/main.cpp
   src/exceptions/exceptions.cpp
   src/argument/arguments.cpp
   src/file_handler/input_file.cpp
+  src/frequency_table/frequency_table.cpp
 )
 
-add_executable(cc-compression-tool-cpp ${SRC_FILES})
+add_executable(${PROJECT_NAME} ${SRC_FILES})
 
-target_include_directories(cc-compression-tool-cpp PRIVATE
+target_include_directories(${PROJECT_NAME} PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}/include
   ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
-# ----------------------------- Add Boost -----------------------------
-find_package(Boost REQUIRED COMPONENTS iostreams CONFIG)
+# Link everything to the main app
+target_link_libraries(${PROJECT_NAME} PRIVATE
+  Boost::iostreams
+  Boost::headers
+  GMP::GMP
+)
 
-# ----------------------------- Add googletest -----------------------------
+# Crucial: Tell Boost to use GMP
+target_compile_definitions(${PROJECT_NAME} PRIVATE BOOST_MULTIPRECISION_USE_GMP)
+
+# ----------------------------- Testing -----------------------------
+
 include(FetchContent)
 FetchContent_Declare(
     googletest
@@ -31,35 +61,32 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(googletest)
 
-# Enable testing
 enable_testing()
 
-# Add test files
-set(TEST_FILES
-  test/hello_test.cpp
-  test/arguments_test.cpp
-  test/file_handler_test.cpp
+add_executable(cc_compression_tool_test 
+    test/hello_test.cpp
+    test/arguments_test.cpp
+    test/file_handler_test.cpp
+    src/argument/arguments.cpp
+    src/exceptions/exceptions.cpp
+    src/file_handler/input_file.cpp
+    src/frequency_table/frequency_table.cpp # Added this so your tests can find the freq logic
 )
 
-# Disable clang-tidy for gtest targets
-set_target_properties(gtest gtest_main PROPERTIES
-    SKIP_CLANG_TIDY TRUE
-)
-
-add_executable(cc_compression_tool_test ${TEST_FILES}
-  src/argument/arguments.cpp
-  src/exceptions/exceptions.cpp
-  src/file_handler/input_file.cpp
-)
 target_include_directories(cc_compression_tool_test PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}/include
   ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
+
 target_link_libraries(cc_compression_tool_test PRIVATE
   GTest::gtest_main
   Boost::iostreams
+  Boost::headers
+  GMP::GMP
 )
+
+# Tell Boost to use GMP in tests too
+target_compile_definitions(cc_compression_tool_test PRIVATE BOOST_MULTIPRECISION_USE_GMP)
+
 include(GoogleTest)
 gtest_discover_tests(cc_compression_tool_test)
-
-target_link_libraries(${PROJECT_NAME} PRIVATE Boost::iostreams)
