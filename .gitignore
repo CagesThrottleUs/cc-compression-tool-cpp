@@ -47,3 +47,5 @@ out/*
 sample/enwik9
 .cursor/*
 cmake_test_discovery_*.json
+
+*.compressed
