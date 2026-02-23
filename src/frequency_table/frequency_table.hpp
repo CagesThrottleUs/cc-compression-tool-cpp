@@ -2,6 +2,7 @@
 #define FREQUENCY_TABLE_HPP
 
 #include <boost/multiprecision/gmp.hpp>
+#include <functional>
 #include <memory>
 #include <vector>
 
@@ -36,13 +37,20 @@ struct node {
 using table = std::vector<node>;
 
 /**
+ * @brief Progress callback: (current_bytes, total_bytes) during scan.
+ */
+using build_progress_callback =
+    std::function<void(std::size_t current, std::size_t total)>;
+
+/**
  * @brief Builds a frequency table from an input file.
  *
  * This function builds a frequency table from an input file. It reads the
  * input file and constructs a frequency table from the contents.
  */
 [[nodiscard]] auto build_frequency_table(
-    std::unique_ptr<file_handler::input_file> input) -> table;
+    std::unique_ptr<file_handler::input_file> input,
+    build_progress_callback* progress = nullptr) -> table;
 
 /**
  * @brief Prints a frequency table to the console.

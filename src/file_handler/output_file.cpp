@@ -77,9 +77,11 @@ auto write_header(const std::map<char32_t, std::string>& prefixes,
   }
 }
 
-auto write_file_contents(std::unique_ptr<file_handler::input_file> input,
-                         const std::map<char32_t, std::string>& prefixes,
-                         output_file& file) noexcept -> void {
+auto write_file_contents(
+    std::unique_ptr<file_handler::input_file> input,
+    const std::map<char32_t, std::string>& prefixes,
+    output_file& file,
+    write_progress_callback* progress) noexcept -> void {
   if (!input || !input->good()) {
     return;
   }
@@ -88,8 +90,14 @@ auto write_file_contents(std::unique_ptr<file_handler::input_file> input,
   std::vector<char> bit_buffer;
   bit_buffer.reserve(kInitialBufferReserve);
 
-  const auto* curr = input->data();
-  const auto* end = std::next(curr, static_cast<std::ptrdiff_t>(input->size()));
+  const auto* const data_start = input->data();
+  const std::size_t total_bytes = input->size();
+  const auto* end =
+      std::next(data_start, static_cast<std::ptrdiff_t>(total_bytes));
+  const auto* curr = data_start;
+  std::size_t last_reported = 0;
+  constexpr std::size_t kProgressIntervalBytes = 65536;
+
   while (curr < end) {
     const char32_t codepoint = utf8::next(curr, end);
     const auto entry = prefixes.find(codepoint);
@@ -99,6 +107,18 @@ auto write_file_contents(std::unique_ptr<file_handler::input_file> input,
     for (const char bit_char : entry->second) {
       bit_buffer.push_back(bit_char);
     }
+    if (progress != nullptr && total_bytes > 0) {
+      const auto current_bytes =
+          static_cast<std::size_t>(curr - data_start);
+      if (current_bytes - last_reported >= kProgressIntervalBytes ||
+          curr >= end) {
+        (*progress)(current_bytes, total_bytes);
+        last_reported = current_bytes;
+      }
+    }
+  }
+  if (progress != nullptr && total_bytes > 0) {
+    (*progress)(total_bytes, total_bytes);
   }
 
   const uint64_t total_bits = bit_buffer.size();
