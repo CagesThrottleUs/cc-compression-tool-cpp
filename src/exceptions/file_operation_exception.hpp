@@ -1,3 +1,6 @@
+#ifndef FILE_OPERATION_EXCEPTION_HPP
+#define FILE_OPERATION_EXCEPTION_HPP
+
 #include "base_exception.hpp"
 
 namespace exceptions {
@@ -16,3 +19,5 @@ class file_operation_exception : public base_exception {
 };
 
 }  // namespace exceptions
+
+#endif  // FILE_OPERATION_EXCEPTION_HPP

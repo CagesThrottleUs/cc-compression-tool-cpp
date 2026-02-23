@@ -5,6 +5,8 @@
 #include <filesystem>
 #include <fstream>
 #include <string>
+#include <utility>
+#include <vector>
 
 #include "exceptions/file_operation_exception.hpp"
 #include "file_handler/input_file.hpp"
@@ -111,6 +113,30 @@ TEST_F(FrequencyTableTest, BuildFrequencyTable_ResultSortedAscendingByCount) {
   ASSERT_EQ(tbl.size(), 3U);
   EXPECT_LE(tbl.at(0).count, tbl.at(1).count);
   EXPECT_LE(tbl.at(1).count, tbl.at(2).count);
+}
+
+TEST_F(FrequencyTableTest, BuildFrequencyTable_WithProgressCallback_InvokesCallback) {
+  const auto path = temp_dir_ / "progress.txt";
+  write_file(path, "aabbcc");
+  auto input = file_handler::load_file(path.string());
+  ASSERT_NE(input, nullptr);
+  const std::size_t total_bytes = input->size();
+
+  std::vector<std::pair<std::size_t, std::size_t>> progress_calls;
+  frequency_table::build_progress_callback progress =
+      [&progress_calls](std::size_t current, std::size_t total) {
+        progress_calls.emplace_back(current, total);
+      };
+
+  auto tbl = frequency_table::build_frequency_table(std::move(input), &progress);
+  ASSERT_EQ(tbl.size(), 3U);
+
+  EXPECT_FALSE(progress_calls.empty()) << "Progress callback should be invoked";
+  EXPECT_EQ(progress_calls.back().first, total_bytes);
+  EXPECT_EQ(progress_calls.back().second, total_bytes);
+  for (const auto& [current, total] : progress_calls) {
+    EXPECT_LE(current, total);
+  }
 }
 
 // --- build_frequency_table: UTF-8 (codepoints > 127) ---

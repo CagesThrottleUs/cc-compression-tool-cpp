@@ -31,6 +31,7 @@ set(SRC_FILES
   src/exceptions/exceptions.cpp
   src/argument/arguments.cpp
   src/file_handler/input_file.cpp
+  src/file_handler/output_file.cpp
   src/frequency_table/frequency_table.cpp
   src/prefix_codes/prefix_codes.cpp
 )
@@ -67,6 +68,7 @@ add_executable(cc_compression_tool_test
     test/hello_test.cpp
     test/arguments_test.cpp
     test/file_handler_test.cpp
+    test/output_file_test.cpp
     test/frequency_table_test.cpp
     test/prefix_codes_test.cpp
     ${SRC_FILES}

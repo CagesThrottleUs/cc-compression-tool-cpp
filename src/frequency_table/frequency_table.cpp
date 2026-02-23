@@ -15,13 +15,19 @@ namespace frequency_table {
 
 constexpr auto ASCII_COUNT = 128;
 
-auto build_frequency_table(std::unique_ptr<file_handler::input_file> input)
-    -> table {
+auto build_frequency_table(
+    std::unique_ptr<file_handler::input_file> input,
+    build_progress_callback* progress) -> table {
   std::array<multiprecision::mpz_int, ASCII_COUNT> ascii_counts{{0}};
   boost::unordered_flat_map<char32_t, multiprecision::mpz_int> unicode_counts;
 
-  const auto* curr = input->data();
-  const auto* end = std::next(curr, static_cast<std::ptrdiff_t>(input->size()));
+  const auto* const data_start = input->data();
+  const std::size_t total_bytes = input->size();
+  const auto* end =
+      std::next(data_start, static_cast<std::ptrdiff_t>(total_bytes));
+  const auto* curr = data_start;
+  std::size_t last_reported = 0;
+  constexpr std::size_t kProgressIntervalBytes = 65536;
 
   try {
     while (curr < end) {
@@ -32,11 +38,23 @@ auto build_frequency_table(std::unique_ptr<file_handler::input_file> input)
       } else {
         unicode_counts[codepoint]++;
       }
+      if (progress != nullptr && total_bytes > 0) {
+        const auto current_bytes =
+            static_cast<std::size_t>(curr - data_start);
+        if (current_bytes - last_reported >= kProgressIntervalBytes ||
+            curr >= end) {
+          (*progress)(current_bytes, total_bytes);
+          last_reported = current_bytes;
+        }
+      }
     }
   } catch (const std::exception& e) {
     throw exceptions::file_operation_exception(
         "Error building frequency table: " + std::string(e.what()) +
         " at offset " + std::to_string(std::distance(input->data(), curr)));
+  }
+  if (progress != nullptr && total_bytes > 0) {
+    (*progress)(total_bytes, total_bytes);
   }
 
   table result;
